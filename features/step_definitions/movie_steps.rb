@@ -15,7 +15,7 @@ end
 Then /I should see "(.*)" before "(.*)"/ do |e1, e2|
   #  ensure that that e1 occurs before e2.
   #  page.body is the entire content of the page as a string.
-  flunk "Unimplemented"
+  page.body.should match /#{e1}.*#{e2}/m
 end
 
 # Make it easier to express checking or unchecking several boxes at once
@@ -23,7 +23,21 @@ end
 #  "When I check the following ratings: G"
 
 When /I (un)?check the following ratings: (.*)/ do |uncheck, rating_list|
-  # HINT: use String#split to split up the rating_list, then
-  #   iterate over the ratings and reuse the "When I check..." or
-  #   "When I uncheck..." steps in lines 89-95 of web_steps.rb
+  rating_list.split(/,\s*/).each do |rating|
+    field = "ratings_#{rating}"
+    if uncheck
+      uncheck(field)
+    else
+      check(field)
+    end
+  end
+end
+
+Then /^I should see (.*) of the movies$/ do |option|
+  # express the regexp above with the code you wish you had
+  if option == 'all'
+    page.should have_css('#movies tbody tr', count: 10)
+  elsif option == 'none'
+    page.should_not have_css('#movies tbody tr')    
+  end
 end
